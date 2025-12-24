@@ -1,0 +1,10 @@
+# env files (can opt-in for committing if needed)
+.env*
+
+# dependencies
+/node_modules
+
+# Jest/teszt mappák bárhol a projektben
+__mocks__/
+__test__/
+

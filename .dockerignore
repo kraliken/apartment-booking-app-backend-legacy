@@ -1,0 +1,13 @@
+/node_modules
+npm-debug.log
+package-lock.json
+
+.env.test
+
+.dockerignore
+Dockerfile
+Dockerfile.prod
+Dockerfile
+.dockerignore
+.git
+.gitignore

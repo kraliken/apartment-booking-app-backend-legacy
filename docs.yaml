@@ -1,0 +1,247 @@
+openapi: 3.0.1
+info:
+  title: Panoráma Apartman Pilisszántó API
+  description:
+    This is a Panoráma Apartman Pilisszántó API documentation. Our API based on REST software architectural style. API has resource-oriented URLs, accepts JSON-encoded request bodies and returns JSON-encoded responses.
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:5000'
+tags:
+- name: "login"
+- name: "user"
+- name: "admin"
+
+schemes:
+- "https"
+- "http"
+
+paths:
+  /api/login:
+    post:
+      tags:
+        - "login"
+      summary: user login, returns jwt, which we can use to authenticate ourselves
+      security:
+        - login_auth: []
+  /api/reservations/user:
+    get:
+      tags:
+        - "user"
+      summary: "return all reservations for the user"
+      responses:
+        '200':
+          description: Reservations data returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllReservations'
+        "401":
+          description: "Unauthorized"
+      security:
+        - jwt_auth: []
+    post:
+      tags:
+        - "user"
+      summary: "the user sends a reservation"
+      requestBody:
+        required: true
+        content:
+         application/json:
+          schema:
+            $ref: "#/components/schemas/UserReservation"
+      responses:
+        "200":
+          description: "the reservation has been successfully saved"
+      responses:
+        "404":
+          description: "invalid input"
+      security:
+        - jwt_auth: []
+  /api/reservations/current/user:
+    get:
+      tags:
+        - "user"
+      summary: return the user own reservations
+      responses:
+        '200':
+          description: return the user's current reservations
+      security:
+        - jwt_auth: []
+  /api/reservations/admin:
+    get:
+      tags:
+        - "admin"
+      summary: return all reservations for the user
+      responses:
+        '200':
+          description: reservations data returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllReservationsForAdmin'
+        "401":
+          description: "Unauthorized"
+      security:
+        - jwt_auth: []
+    post:
+      tags:
+        - "admin"
+      summary: the admin sends a reservation
+      requestBody:
+        required: true
+        content:
+         application/json:
+          schema:
+            $ref: "#/components/schemas/AdminReservation"
+      responses:
+        "200":
+          description: "the reservation has been successfully saved"
+        "401":
+          description: "Unauthorized"
+      responses:
+      security:
+        - jwt_auth: []
+  /api/reservations/current/admin:
+    get:
+      tags:
+        - "admin"
+      summary: the admin queries their own all and users current reservations
+      responses:
+        '200':
+          description: return the user's current reservations
+      security:
+        - jwt_auth: []
+  /api/reservations/{id}:
+    delete:
+      tags:
+        - "admin"
+      summary: the admin delete reservation
+
+      parameters:
+        - in: path
+          name: "id"
+          description: "reservation id to delete"
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: return the deleted reservations
+      security:
+        - jwt_auth: []
+
+components:
+  securitySchemes:
+    login_auth:
+      type: oauth2
+      flows:
+        authorizationCode:   # <---- OAuth flow(authorizationCode, implicit, password or clientCredentials)
+          authorizationUrl: https://accounts.google.com/o/oauth2/v2/auth?scope=openid%20profile%20email
+          tokenUrl: https://oauth2.googleapis.com/token
+          scopes: {}
+    jwt_auth:        
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+      scopes: {}
+  schemas:
+    UserReservation:
+      type: "object"
+      properties:
+        checkin:
+          type: string
+        checkout:
+          type: string
+        email:
+          type: string
+        firstname:
+          type: string
+          minLength: 3
+          maxLength: 20
+        lastname:
+          type: string
+          minLength: 3
+          maxLength: 20
+        phone:
+          type: string
+    Date:
+      type: "string"
+    AllReservations: 
+        type: "object"
+        properties:
+          checkinArray:
+            type: "array"
+            items:
+              $ref: '#/components/schemas/Date'
+          checkoutArray:
+            type: "array"
+            items:
+              $ref: '#/components/schemas/Date'
+    AllReservationsForAdmin: 
+      type: "object"
+      properties:
+        checkinArray:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/Date'
+        checkoutArray:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/Date'
+        adminArray:
+          type: "array"
+          items:
+            $ref: '#/components/schemas/Date'
+    AdminReservation:
+      type: "array"
+      items:
+        type: object
+        properties:
+          checkin:
+            type: string
+          checkout:
+            type: string
+          nights:
+            type: number
+          googleId:
+            type: string
+    # ReservationObject:
+    #   type: "object"
+    #   properties:
+    #     calendar_eventId: 
+    #       type: "string"
+    #     checkin: 
+    #       type: "string"
+    #     checkout: 
+    #       type: "string"
+    #     createdAt: 
+    #       type: "string"
+    #     email: 
+    #       type: "string"
+    #     first_name: 
+    #       type: "string"
+    #     googleId: 
+    #       type: "string"
+    #     last_name: 
+    #       type: "string"
+    #     nights: 
+    #       type: "string"
+    #     persons: 
+    #       type: "string"
+    #     phone: 
+    #       type: "string"
+    #     updatedAt: 
+    #       type: "string"
+    #     __v: 
+    #         type: "integer"
+    #         format: "int64"       
+    #     _id: 
+    #       type: "string"
+    # CurrentUserReservations:
+    #   type: "object"
+    #     properties:
+    #       userReservations:
+    #         type: "array"
+    #         items:
+    #           $ref: '#/components/schemas/ReservationObject'
